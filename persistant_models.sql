@@ -17,7 +17,7 @@ col object_name for a20
 col name for a20
 col subobject_name for a20
 col target_attribute for a20
-set timing on echo on linesize 110 pagesize 50 serveroutput on
+set timing on echo on linesize 110 pagesize 50 serveroutput on long 1000
 
 -- The examples shown before used the dbms_predictive_analytics packge, which seems to 
 -- create transient models.  To have a persistant model, it appears that one must
@@ -51,12 +51,32 @@ SELECT name, function_name, algorithm_name, target_attribute
 -- The end goal of all this data mining and machine learning is to predict 
 -- attributes about new data given patterns in old data.  So how do we do that?
 -- Here is one way - a simple SQL query against dual.
+-- I think one would probably just want the prediction; but I've included the details 
+-- and probability functions here as well.
 SELECT PREDICTION(
-    paul_model USING
-    5 AS sepal_length,
-    3 AS sepal_width,
-    1 AS petal_length,
-    .5 AS petal_width) AS predicted_class
+         paul_model USING
+         5 AS sepal_length,
+         3 AS sepal_width,
+         4 AS petal_length,
+         .5 AS petal_width) AS predicted_class,
+       --PREDICTION_COST(      -- cost function requires a cost matrix which tells 
+         --paul_model USING    -- oracle the bias to use in order to avoid the most
+         --5 AS sepal_length,  -- harmful kinds of misclassifications.  I'm not going into that now.
+         --3 AS sepal_width,
+         --4 AS petal_length,
+         --.5 AS petal_width) AS prediction_cost,
+       PREDICTION_DETAILS(
+         paul_model USING
+         5 AS sepal_length,
+         3 AS sepal_width,
+         4 AS petal_length,
+         .5 AS petal_width) AS prediction_details,
+       PREDICTION_PROBABILITY(
+         paul_model USING
+         5 AS sepal_length,
+         3 AS sepal_width,
+         4 AS petal_length,
+         .5 AS petal_width) AS prediction_probability
   FROM dual
 /
 
